@@ -1,8 +1,8 @@
 import hashlib
 
-from flask import Blueprint, json, request, jsonify
+from flask import Blueprint, request, jsonify
 
-from ..models import auth_model
+from ...models import auth_model
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -52,3 +52,19 @@ def get_by_id(id: int):
         return jsonify({"success": True, "message": user}), 200
     else:
         return jsonify({"success": False, "message": "User not found"}), 404
+
+@auth_bp.route("/authenticate", methods=["POST"])
+def auth():    
+    client_id = request.form.get("client_id")
+    client_secret_input = request.form.get("client_secret")
+
+    # Hash client secret with the same hash as in DB
+    hash_object = hashlib.sha1(bytes(client_secret_input, "utf-8"))
+    hashed_client_secret = hash_object.hexdigest()
+
+    authentication = auth_model.authenticate(client_id, hashed_client_secret)
+
+    if authentication:
+        return jsonify(authentication), 200
+    else:
+        return {"success": False, "message": "Authentication failed."}, 401
