@@ -2,6 +2,8 @@ from flask import current_app
 import jwt
 import psycopg2
 
+from auth_service.routes.auth.utils.jwt import encode_jwt
+
 from ..utils.db_utils import get_connection_string
 
 connection_string = get_connection_string()
@@ -84,7 +86,7 @@ def authenticate(clientId, clientSecret):
                 payload = auth_payload(row[0],row[1], isAdmin)
                 break
 
-            encoded_jwt = jwt.encode(payload, current_app.config["AUTHSECRET"], algorithm="HS256")
+            encoded_jwt = encode_jwt(payload)
 
             response = auth_response(encoded_jwt, current_app.config["EXPIRESSECONDS"], isAdmin)
 

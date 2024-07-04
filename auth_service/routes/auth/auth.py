@@ -2,7 +2,7 @@ import hashlib
 
 from flask import Blueprint, request, jsonify
 
-from auth_service.routes.auth.utils.verify_jwt import verify_jwt
+from auth_service.routes.auth.utils.jwt import decode_jwt
 
 from ...models import auth_model
 
@@ -77,9 +77,9 @@ def auth():
 
 @auth_bp.route("/verify-jwt", methods=["POST"])
 def verify():
-    authorizationHeader = request.headers.get('Authorization')    
+    authorizationHeader = request.headers.get("Authorization")    
     token = authorizationHeader.replace("Bearer ","")
-    verification = verify_jwt(token)
+    verification = decode_jwt(token)
 
     if verification:
         return jsonify({"success": True, "message": verification }), 200

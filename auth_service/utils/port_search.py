@@ -5,7 +5,7 @@ def find_free_port(start_port: int):
     print(port)
     while True:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            if s.connect_ex(('localhost', port)) != 0:
+            if s.connect_ex(("localhost", port)) != 0:
                 return port
             port += 1
             print(f"port:{port}")
