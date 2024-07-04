@@ -106,11 +106,3 @@ def authenticate(clientId, clientSecret):
         if connection is not None:
             cursor.close()
             connection.close()
-
-def verify_jwt(token):
-    try:
-        decoded = jwt.decode(token, current_app.config["AUTHSECRET"], algorithms=["HS256"])
-        return decoded
-    except (Exception) as error:
-        print(error)
-        return False

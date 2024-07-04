@@ -2,6 +2,8 @@ import hashlib
 
 from flask import Blueprint, request, jsonify
 
+from auth_service.routes.auth.utils.verify_jwt import verify_jwt
+
 from ...models import auth_model
 
 auth_bp = Blueprint("auth", __name__)
@@ -77,7 +79,7 @@ def auth():
 def verify():
     authorizationHeader = request.headers.get('Authorization')    
     token = authorizationHeader.replace("Bearer ","")
-    verification = auth_model.verify_jwt(token)
+    verification = verify_jwt(token)
 
     if verification:
         return jsonify({"success": True, "message": verification }), 200
