@@ -9,4 +9,4 @@ class auth_payload(dict):
         self["id"] = id
         self["sub"] = clientId
         self["isAdmin"] = isAdmin
-        self["exp"] = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=EXPIRESSECONDS)).isoformat()
+        self["exp"] = int((datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=EXPIRESSECONDS)).timestamp())

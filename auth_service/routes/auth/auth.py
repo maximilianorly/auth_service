@@ -13,9 +13,10 @@ def login():
     password = data.get("password")
 
     if username == "admin" and password == "password":
-        return jsonify({"message": "Login successful"}), 200
+        return jsonify({"success": True, "message": "Login successful"}), 200
     else:
-        return jsonify({"message": "Invalid credentials"}), 401
+        return jsonify({"success": False, "message": "Invalid credentials"}), 401
+
 
 @auth_bp.route("/client", methods=["POST","DELETE"])
 def client():
@@ -44,6 +45,7 @@ def client():
         # not yet implemented
         return jsonify({"success": False, "message": "Method not implemented"}), 501
 
+
 @auth_bp.route(f"/client/<int:id>", methods=["GET"])
 def get_by_id(id: int):
     user = auth_model.get_by_id(id)
@@ -52,6 +54,7 @@ def get_by_id(id: int):
         return jsonify({"success": True, "message": user}), 200
     else:
         return jsonify({"success": False, "message": "User not found"}), 404
+
 
 @auth_bp.route("/authenticate", methods=["POST"])
 def auth():    
@@ -65,6 +68,19 @@ def auth():
     authentication = auth_model.authenticate(client_id, hashed_client_secret)
 
     if authentication:
-        return jsonify(authentication), 200
+        return jsonify({ "success": True, "message": authentication }), 200
     else:
         return {"success": False, "message": "Authentication failed."}, 401
+
+
+@auth_bp.route("/verify-jwt", methods=["POST"])
+def verify():
+    authorizationHeader = request.headers.get('Authorization')    
+    token = authorizationHeader.replace("Bearer ","")
+    verification = auth_model.verify_jwt(token)
+
+    if verification:
+        return jsonify({"success": True, "message": verification }), 200
+    else:
+        return jsonify({"success": False, "message": "Unauthorized"}), 401
+        
