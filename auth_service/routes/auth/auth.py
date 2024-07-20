@@ -2,31 +2,21 @@ import hashlib
 
 from flask import Blueprint, request, jsonify
 
-from auth_service.routes.auth.utils.jwt import decode_jwt
+from auth_service.routes.auth.utils.authorization_header import extract_token, get_authorization_header
+from auth_service.routes.auth.utils.decorators import handle_auth_required
+from auth_service.routes.auth.utils.jwt import encode_jwt, decode_jwt, get_token_expiration 
+
+from auth_service.routes.auth.utils.exceptions import AuthorizationHeaderMissing, InvalidToken, JWTDecodeError, TokenExpirationError
+
+from auth_service.store.blacklist import blacklist_token, is_token_blacklisted
 
 from ...models import auth_model
 
 auth_bp = Blueprint("auth", __name__)
 
-@auth_bp.route("/login", methods=["POST"])
-def login():
-    data = request.get_json()
-    username = data.get("username")
-    password = data.get("password")
-
-    if username == "admin" and password == "password":
-        return jsonify({"success": True, "message": "Login successful"}), 200
-    else:
-        return jsonify({"success": False, "message": "Invalid credentials"}), 401
-
-
 @auth_bp.route("/client", methods=["POST","DELETE"])
 def client():
     if request.method == "POST":
-
-        # verify the token 
-        # TODO after we create first credentials
-
         # get the client_id and secret from the client application
         client_id = request.form.get("client_id")
         client_secret_input = request.form.get("client_secret")
@@ -49,7 +39,8 @@ def client():
 
 
 @auth_bp.route(f"/client/<int:id>", methods=["GET"])
-def get_by_id(id: int):
+@handle_auth_required
+def get_by_id(id: int, token, decoded_token):
     user = auth_model.get_by_id(id)
     
     if user:
@@ -76,13 +67,18 @@ def auth():
 
 
 @auth_bp.route("/verify-jwt", methods=["POST"])
-def verify():
-    authorizationHeader = request.headers.get("Authorization")    
-    token = authorizationHeader.replace("Bearer ","")
-    verification = decode_jwt(token)
+@handle_auth_required
+def verify(token, decoded_token):
+    return jsonify({"success": True, "message": decoded_token }), 200
+    
+@auth_bp.route("/logout", methods=["POST"])
+@handle_auth_required
+def logout(token, decoded_token):
+    exp = get_token_expiration(decoded_token)
+    success = blacklist_token(token, exp)
 
-    if verification:
-        return jsonify({"success": True, "message": verification }), 200
+    if success:
+        return jsonify({"success": True, "message": "Successfully logged out user"}), 200
     else:
-        return jsonify({"success": False, "message": "Unauthorized"}), 401
-        
+        return jsonify({"success": False, "message": "Failed to log user out"}), 500
+    
