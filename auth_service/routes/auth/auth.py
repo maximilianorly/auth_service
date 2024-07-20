@@ -2,14 +2,10 @@ import hashlib
 
 from flask import Blueprint, request, jsonify, current_app
 
-from auth_service.models.utils.exceptions import DatabaseConnectionError
-from auth_service.routes.auth.utils.authorization_header import extract_token, get_authorization_header
 from auth_service.routes.auth.utils.decorators import handle_auth_required, handle_database_exceptions
-from auth_service.routes.auth.utils.jwt import encode_jwt, decode_jwt, get_token_expiration 
+from auth_service.routes.auth.utils.jwt import encode_jwt, get_token_expiration 
 
-from auth_service.routes.auth.utils.exceptions import AuthorizationHeaderMissing, InvalidToken, JWTDecodeError, TokenExpirationError
-
-from auth_service.store.blacklist import blacklist_token, is_token_blacklisted
+from auth_service.store.blacklist import blacklist_token
 
 from ...models import auth_model
 
