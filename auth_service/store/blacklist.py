@@ -17,5 +17,5 @@ def is_token_blacklisted(token):
             return True, "Token blacklisted"
         return False
     except Exception as error:
-        print(error)
+        print("Error checking blacklist status", error)
         raise TokenBlacklistError("Error checking blacklist status") 

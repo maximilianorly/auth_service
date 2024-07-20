@@ -1,9 +1,10 @@
 import hashlib
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 
+from auth_service.models.utils.exceptions import DatabaseConnectionError
 from auth_service.routes.auth.utils.authorization_header import extract_token, get_authorization_header
-from auth_service.routes.auth.utils.decorators import handle_auth_required
+from auth_service.routes.auth.utils.decorators import handle_auth_required, handle_database_exceptions
 from auth_service.routes.auth.utils.jwt import encode_jwt, decode_jwt, get_token_expiration 
 
 from auth_service.routes.auth.utils.exceptions import AuthorizationHeaderMissing, InvalidToken, JWTDecodeError, TokenExpirationError
@@ -15,6 +16,7 @@ from ...models import auth_model
 auth_bp = Blueprint("auth", __name__)
 
 @auth_bp.route("/client", methods=["POST","DELETE"])
+@handle_database_exceptions
 def client():
     if request.method == "POST":
         # get the client_id and secret from the client application
@@ -40,6 +42,7 @@ def client():
 
 @auth_bp.route(f"/client/<int:id>", methods=["GET"])
 @handle_auth_required
+@handle_database_exceptions
 def get_by_id(id: int, token, decoded_token):
     user = auth_model.get_by_id(id)
     
@@ -50,7 +53,8 @@ def get_by_id(id: int, token, decoded_token):
 
 
 @auth_bp.route("/authenticate", methods=["POST"])
-def auth():    
+@handle_database_exceptions
+def auth():
     client_id = request.form.get("client_id")
     client_secret_input = request.form.get("client_secret")
 
@@ -58,13 +62,19 @@ def auth():
     hash_object = hashlib.sha1(bytes(client_secret_input, "utf-8"))
     hashed_client_secret = hash_object.hexdigest()
 
-    authentication = auth_model.authenticate(client_id, hashed_client_secret)
+    user = auth_model.get_user_by_credentials(client_id, hashed_client_secret)
 
-    if authentication:
-        return jsonify({ "success": True, "message": authentication }), 200
+    if user:
+        from auth_service.routes.auth.utils.auth_payload import auth_payload
+        from auth_service.routes.auth.utils.auth_response import auth_response
+
+        payload = auth_payload(user['id'], user['client_id'], user['is_admin'])            
+        encoded_jwt = encode_jwt(payload)
+
+        response = auth_response(encoded_jwt, current_app.config["EXPIRESSECONDS"], user["is_admin"])
+        return response
     else:
-        return {"success": False, "message": "Authentication failed."}, 401
-
+        return jsonify({"success": False, "message": "User not found"}), 404
 
 @auth_bp.route("/verify-jwt", methods=["POST"])
 @handle_auth_required
