@@ -1,6 +1,7 @@
 from functools import wraps
 from flask import jsonify
 
+from auth_service.models.utils.exceptions import DatabaseConnectionError
 from auth_service.routes.auth.utils.authorization_header import get_authorization_header, extract_token
 from auth_service.routes.auth.utils.exceptions import AuthorizationHeaderMissing, InvalidToken, JWTDecodeError, TokenExpirationError
 from auth_service.routes.auth.utils.jwt import decode_jwt
@@ -32,6 +33,17 @@ def handle_auth_required(func):
             return jsonify({"success": False, "message": str(e)}), 401
         except TokenExpirationError as e:
             return jsonify({"success": False, "message": str(e)}), 401
+        except Exception as e:
+            return jsonify({"success": False, "message": "An unexpected error occurred"}), 500
+    return decorated_function
+
+def handle_database_exceptions(func):
+    @wraps(func)
+    def decorated_function(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except DatabaseConnectionError as e:
+            return jsonify({"success": False, "message": str(e)}), 500
         except Exception as e:
             return jsonify({"success": False, "message": "An unexpected error occurred"}), 500
     return decorated_function

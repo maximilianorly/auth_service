@@ -8,7 +8,7 @@ def encode_jwt(payload):
         encoded = jwt.encode(payload, current_app.config["AUTHSECRET"], algorithm="HS256")
         return encoded
     except (Exception) as error:
-        print(error)
+        print("Error encoding JWT", error)
         return False
 
 def decode_jwt(token):
@@ -16,7 +16,7 @@ def decode_jwt(token):
         decoded = jwt.decode(token, current_app.config["AUTHSECRET"], algorithms=["HS256"])
         return decoded
     except (Exception) as error:
-        print(error)
+        print("Failed to decode JWT:", error)
         raise JWTDecodeError(f"Failed to decode JWT: {error}")
 
 def get_token_expiration(decoded):
@@ -24,13 +24,13 @@ def get_token_expiration(decoded):
         exp = decoded.get('exp')
         return exp
     except (Exception) as error:
-        print(error)
-        raise TokenExpirationError("Invalid Token supplied")
+        print("Error extracting token expiration", error)
+        raise TokenExpirationError("Error extracting token expiration")
 
 def extract_token(authorization_header):
     try:
         token = authorization_header.replace("Bearer ", "")
         return token
     except (Exception) as error:
-        print(error)
-        raise InvalidToken("Invalid Token supplied")
+        print("Error extracting token supplied", error)
+        raise InvalidToken("Error extracting token supplied")
