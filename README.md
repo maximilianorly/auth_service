@@ -8,7 +8,7 @@ Follow these steps to set up and run the application:
 
 ### 1. Create a Virtual Environment
 
-First, create a virtual environment to manage dependencies. This keeps your project dependencies isolated from your system Python installation.
+First, create a virtual environment to manage dependencies. This keeps the project dependencies isolated from your system Python installation.
 
 ```bash
 python3 -m venv venv
@@ -40,15 +40,15 @@ pip install flask psycopg2-binary pyjwt python-dotenv
 
 ### 4. Run the Application
 
-Finally, run your application using Python.
+Finally, run the application using Python.
 
 ```bash
-python3 app.py
+python3 wsgi.py
 ```
 
 ## Additional Notes
 
-Make sure to deactivate the virtual environment when you're done working on your project. You can do this whilst in a virtual environment by running:
+Make sure to deactivate the virtual environment when you're done working on the project. You can do this whilst in a virtual environment by running:
 
 ```bash
 deactivate
