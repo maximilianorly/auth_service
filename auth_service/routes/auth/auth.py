@@ -20,8 +20,8 @@ def client():
         client_secret_input = request.form.get("client_secret")
         is_admin = request.form.get("is_admin")        
 
-        # the client secret in the database is "hashed" with a one-way hash
-        hash_object = hashlib.sha1(bytes(client_secret_input, "utf-8"))
+        # Store as 256 bit hash
+        hash_object = hashlib.sha256(bytes(client_secret_input, "utf-8"))
         hashed_client_secret = hash_object.hexdigest()
 
         createResponse = auth_model.create(client_id, hashed_client_secret, is_admin)
@@ -54,8 +54,8 @@ def auth():
     client_id = request.form.get("client_id")
     client_secret_input = request.form.get("client_secret")
 
-    # Hash client secret with the same hash as in DB
-    hash_object = hashlib.sha1(bytes(client_secret_input, "utf-8"))
+    # Hash supplied client secret with the same hash as in DB for comparison
+    hash_object = hashlib.sha256(bytes(client_secret_input, "utf-8"))
     hashed_client_secret = hash_object.hexdigest()
 
     user = auth_model.get_user_by_credentials(client_id, hashed_client_secret)
