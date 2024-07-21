@@ -30,20 +30,28 @@ On Windows:
 venv\Scripts\activate
 ```
 
-### 3. Install Dependencies
+### 3. Installing dependancies and running the app
 
-With the virtual environment activated, install the required dependencies using pip.
+With the virtual environment activated, use docker to install the required dependencies using pip and build the app containers.
+
+Note that both development and staging environment starts databases within the container network and production uses seperately hosted DBs
+
+development environment:
 
 ```bash
-pip install flask psycopg2-binary pyjwt python-dotenv
+docker-compose --env-file .env.development -f docker-compose.yml up --build -d
 ```
 
-### 4. Run the Application
-
-Finally, run the application using Python.
+staging/test environment:
 
 ```bash
-python3 wsgi.py
+docker-compose --env-file .env.staging -f docker-compose.staging.yml up --build -d
+```
+
+production environment:
+
+```bash
+docker-compose --env-file .env.production -f docker-compose.production.yml up --build -d
 ```
 
 ## Additional Notes

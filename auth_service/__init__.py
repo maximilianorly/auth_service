@@ -27,7 +27,6 @@ def create_app():
             os.environ["FLASK_RUN_PORT"] = f"{free_port}"
             os.environ["RUNNING"] = "1"
 
-    print(app.config)
     register_blueprints(app)
 
     return app
