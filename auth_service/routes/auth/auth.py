@@ -1,7 +1,9 @@
 import hashlib
 
 from flask import Blueprint, request, jsonify, current_app
+from uuid import UUID
 
+from auth_service.models.utils.db_utils import get_connection_string, get_cursor
 from auth_service.routes.auth.utils.decorators import handle_auth_required, handle_database_exceptions
 from auth_service.routes.auth.utils.jwt import encode_jwt, get_token_expiration 
 
@@ -36,10 +38,10 @@ def client():
         return jsonify({"success": False, "message": "Method not implemented"}), 501
 
 
-@auth_bp.route(f"/client/<int:id>", methods=["GET"])
+@auth_bp.route(f"/client/<uuid:id>", methods=["GET"])
 @handle_auth_required
 @handle_database_exceptions
-def get_by_id(id: int, token, decoded_token):
+def get_by_id(id: UUID, token, decoded_token):
     user = auth_model.get_by_id(id)
     
     if user:

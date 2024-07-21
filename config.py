@@ -3,11 +3,11 @@ import os
 class Config:
     RUNNING=0
     DEBUG = False
-    DBNAME = os.getenv("DBNAME")
-    DBUSER = os.getenv("DBUSER")
-    DBPASSWORD = os.getenv("DBPASSWORD")
-    DBHOST = os.getenv("HOST")
-    DBPORT = os.getenv("DBPORT")
+    DBNAME = os.getenv("POSTGRES_DB")
+    DBUSER = os.getenv("POSTGRES_USER")
+    DBPASSWORD = os.getenv("POSTGRES_PASSWORD")
+    DBHOST = os.getenv("POSTGRES_HOST")
+    DBPORT = os.getenv("POSTGRES_PORT")
     AUTHSECRET = os.getenv("AUTHSECRET")
     EXPIRESSECONDS = os.getenv("EXPIRESSECONDS")
     FLASK_RUN_PORT = os.getenv("FLASK_RUN_PORT", 5000)

@@ -1,3 +1,4 @@
+from uuid import UUID
 import psycopg2
 
 from auth_service.models.utils.db_utils import end_cursor, get_cursor
@@ -22,14 +23,14 @@ def create(clientId: str, clientSecret: str, isAdmin: bool):
     finally:
         end_cursor(cursor, connection)
 
-def get_by_id(id: int):
+def get_by_id(id: UUID):
     connection = None
     cursor = None
     query = f"SELECT * FROM clients WHERE \"Id\" = %s"
 
     try:
         cursor, connection = get_cursor()
-        cursor.execute(query, (id,))
+        cursor.execute(query, (str(id),))
         user = cursor.fetchone()
         if user:
             # Convert the user data to a dictionary

@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: auth_service__postgres
+    env_file:
+      - .env.development
+    volumes:
+      - ./auth_service/models/utils/init_db_migration.sql:/docker-entrypoint-initdb.d/init_db_migration.sql
+    ports:
+      - "${POSTGRES_PORT:-5432}:${POSTGRES_PORT:-5432}"
+
+  redis:
+    image: redis:latest
+    container_name: auth_service__redis
+    env_file:
+      - .env.development
+    ports:
+      - "${REDIS_PORT:-6379}:${REDIS_PORT:-6379}"
+
+  app:
+    build: .
+    container_name: auth_service__app
+    env_file:
+      - .env.development
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "${DOCKER_RUN_PORT:-5000}:${FLASK_RUN_PORT:-5000}"
+    volumes:
+      - .:/app
+    command: flask run --host=0.0.0.0
